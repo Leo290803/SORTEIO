@@ -105,3 +105,64 @@
   .shadow-gold { box-shadow: var(--shadow-gold); }
   .shadow-card { box-shadow: var(--shadow-card); }
 }
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  header,
+  nav,
+  button {
+    display: none !important;
+  }
+}
+
+@media print {
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  header, nav, button {
+    display: none !important;
+  }
+
+  .container {
+    padding: 0 !important;
+  }
+
+  /* 🔥 NÃO QUEBRAR ELEMENTOS */
+  .break-inside-avoid,
+  .break-inside-avoid-page {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* 🔥 AJUSTE GERAL */
+  h1 {
+    font-size: 22px !important;
+  }
+
+  h2 {
+    font-size: 18px !important;
+  }
+
+  /* 🔥 DIMINUI ESPAÇOS */
+  .mb-8 {
+    margin-bottom: 10px !important;
+  }
+
+  .gap-6 {
+    gap: 10px !important;
+  }
+
+  /* 🔥 TENTAR CABER EM 1 PÁGINA */
+  main {
+    transform: scale(0.95);
+    transform-origin: top;
+  }
+
+}

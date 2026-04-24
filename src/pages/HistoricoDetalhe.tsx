@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { AppHeader } from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, Trophy, Trash2 } from "lucide-react";
+import { ArrowLeft, Calendar, Trophy, Trash2, Printer } from "lucide-react";
 import { ResultadoView, ResultadoItem } from "@/components/ResultadoView";
 
 interface Sorteio {
@@ -29,13 +29,11 @@ const HistoricoDetalhe = () => {
     (async () => {
       const [{ data: s }, { data: r }, { data: equipes }] = await Promise.all([
         supabase.from("sorteios").select("*").eq("id", id).maybeSingle(),
-
         supabase
           .from("resultados_sorteio")
           .select("equipe_nome, grupo, posicao, confronto")
           .eq("sorteio_id", id)
           .order("posicao", { ascending: true }),
-
         supabase.from("equipes").select("nome, escola"),
       ]);
 
@@ -55,31 +53,30 @@ const HistoricoDetalhe = () => {
     })();
   }, [id]);
 
-  // 🔥 FUNÇÃO DE EXCLUIR
+  // 🗑️ EXCLUIR
   const handleDelete = async () => {
     const confirmar = confirm("Tem certeza que deseja excluir este sorteio?");
     if (!confirmar || !id) return;
 
     try {
-      // apagar resultados primeiro
       await supabase
         .from("resultados_sorteio")
         .delete()
         .eq("sorteio_id", id);
 
-      // apagar sorteio
-      await supabase
-        .from("sorteios")
-        .delete()
-        .eq("id", id);
+      await supabase.from("sorteios").delete().eq("id", id);
 
       alert("Sorteio excluído com sucesso!");
-
       navigate("/historico");
     } catch (error) {
       console.error(error);
       alert("Erro ao excluir sorteio.");
     }
+  };
+
+  // 🖨️ IMPRIMIR
+  const handlePrint = () => {
+    window.print();
   };
 
   return (
@@ -89,7 +86,7 @@ const HistoricoDetalhe = () => {
       <main className="container py-8 md:py-12">
         <Link
           to="/historico"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors print:hidden"
         >
           <ArrowLeft className="w-4 h-4" /> Voltar ao histórico
         </Link>
@@ -104,8 +101,19 @@ const HistoricoDetalhe = () => {
           </div>
         ) : (
           <>
+            {/* 🔥 CABEÇALHO PARA IMPRESSÃO */}
+            <div className="hidden print:block text-center mb-6">
+              <h1 className="text-2xl font-bold">SORTEIO OFICIAL</h1>
+              <p>
+                {sorteio.modalidade} - {sorteio.categoria} - {sorteio.naipe}
+              </p>
+              <p>
+                {new Date(sorteio.created_at).toLocaleString("pt-BR")}
+              </p>
+            </div>
+
             <div className="mb-8">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2 print:hidden">
                 <Calendar className="w-4 h-4" />
                 {new Date(sorteio.created_at).toLocaleString("pt-BR")}
               </div>
@@ -122,14 +130,24 @@ const HistoricoDetalhe = () => {
                 </Badge>
               </div>
 
-              {/* 🗑️ BOTÃO EXCLUIR */}
-              <button
-                onClick={handleDelete}
-                className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-              >
-                <Trash2 className="w-4 h-4" />
-                Excluir Sorteio
-              </button>
+              {/* 🔥 BOTÕES */}
+              <div className="flex gap-3 print:hidden">
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Excluir
+                </button>
+
+                <button
+                  onClick={handlePrint}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                >
+                  <Printer className="w-4 h-4" />
+                  Imprimir
+                </button>
+              </div>
             </div>
 
             <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2">
