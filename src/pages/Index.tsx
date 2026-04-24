@@ -10,7 +10,10 @@ const Index = () => {
   useEffect(() => {
     (async () => {
       const [{ count: e }, { count: s }] = await Promise.all([
-        supabase.from("equipes").select("*", { count: "exact", head: true }).eq("ativo", true),
+        supabase
+          .from("equipes")
+          .select("*", { count: "exact", head: true })
+          .eq("ativo", true),
         supabase.from("sorteios").select("*", { count: "exact", head: true }),
       ]);
       setStats({ equipes: e ?? 0, sorteios: s ?? 0 });
@@ -47,30 +50,60 @@ const Index = () => {
 
       <main className="container py-12 md:py-20">
         <section className="text-center mb-16 animate-fade-in">
+          
+          {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary border border-border text-xs uppercase tracking-[0.2em] text-muted-foreground mb-6">
             <Sparkles className="w-3.5 h-3.5 text-accent" />
             Sistema oficial
           </div>
-          <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6">
-            <span className="text-glow">SORTEIO</span>{" "}
-            <span className="bg-gradient-gold bg-clip-text text-transparent">ESPORTIVO</span>
-          </h1>
+
+          {/* 🔥 TÍTULO + LOGO LADO A LADO */}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-6">
+            
+            {/* TÍTULO */}
+            <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight">
+              <span className="text-glow">SORTEIO</span>
+            </h1>
+
+            {/* LOGO */}
+            <div className="bg-white rounded-2xl px-6 py-3 shadow-xl border border-gray-200">
+              <img
+                src="/WhatsApp Image 2026-04-23 at 13.33.03.jpeg"
+                alt="IDJUV"
+                className="h-16 md:h-20 object-contain"
+              />
+            </div>
+
+          </div>
+
+          {/* Texto */}
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
             Sorteio IDJUV.
           </p>
 
+          {/* Estatísticas */}
           <div className="flex flex-wrap justify-center gap-6 mt-10">
             <div className="px-6 py-4 rounded-xl bg-card/60 border border-border min-w-[160px]">
-              <div className="text-3xl font-display font-bold text-primary">{stats.equipes}</div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Equipes ativas</div>
+              <div className="text-3xl font-display font-bold text-primary">
+                {stats.equipes}
+              </div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                Equipes ativas
+              </div>
             </div>
+
             <div className="px-6 py-4 rounded-xl bg-card/60 border border-border min-w-[160px]">
-              <div className="text-3xl font-display font-bold text-accent">{stats.sorteios}</div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Sorteios realizados</div>
+              <div className="text-3xl font-display font-bold text-accent">
+                {stats.sorteios}
+              </div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                Sorteios realizados
+              </div>
             </div>
           </div>
         </section>
 
+        {/* Cards */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {cards.map(({ to, icon: Icon, title, desc, accent }) => (
             <Link
@@ -81,19 +114,25 @@ const Index = () => {
               <div
                 className={`absolute -top-20 -right-20 w-40 h-40 rounded-full bg-gradient-to-br ${accent} opacity-20 blur-3xl group-hover:opacity-40 transition-opacity`}
               />
+
               <div className="relative">
                 <div
                   className={`w-14 h-14 rounded-xl bg-gradient-to-br ${accent} grid place-items-center mb-5 group-hover:scale-110 transition-transform`}
                 >
                   <Icon className="w-7 h-7 text-primary-foreground" />
                 </div>
-                <h2 className="font-display text-2xl font-bold mb-2">{title}</h2>
+
+                <h2 className="font-display text-2xl font-bold mb-2">
+                  {title}
+                </h2>
+
                 <p className="text-muted-foreground">{desc}</p>
               </div>
             </Link>
           ))}
         </section>
 
+        {/* Rodapé */}
         <footer className="mt-20 text-center text-xs uppercase tracking-[0.3em] text-muted-foreground">
           <Trophy className="w-4 h-4 inline mr-2 text-accent" />
           Pronto para o telão
