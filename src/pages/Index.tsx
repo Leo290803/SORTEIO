@@ -56,8 +56,7 @@ const Index = () => {
             <span className="bg-gradient-gold bg-clip-text text-transparent">ESPORTIVO</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Sorteio profissional de equipes para o congresso técnico — animação ao vivo, formação automática de grupos
-            e histórico completo.
+            Sorteio IDJUV.
           </p>
 
           <div className="flex flex-wrap justify-center gap-6 mt-10">
