@@ -215,7 +215,7 @@ const Equipes = () => {
               onClick={() => setBulkOpen(true)}
               className="border-accent/40 text-accent hover:bg-accent/10 hover:text-accent"
             >
-              <Zap className="w-5 h-5 mr-2" /> Cadastro rsssápido
+              <Zap className="w-5 h-5 mr-2" /> Cadastro rápido
             </Button>
             <Button size="lg" onClick={openNew} className="bg-gradient-primary shadow-glow">
               <Plus className="w-5 h-5 mr-2" /> Novo cadastro
