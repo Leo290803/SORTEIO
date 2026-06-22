@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -34,22 +35,42 @@ interface Props {
   onSaved: () => void;
 }
 
-/**
- * Cadastro em massa: cole/digite várias linhas e cadastra todas de uma vez.
- *
- * Formato por linha:
- * - Modalidade coletiva: "Nome da Escola"
- * - Modalidade individual: "Nome do Atleta" ou "Nome | Escola"
- * - Modalidade dupla: "Atleta 1 & Atleta 2" ou "Atleta 1 & Atleta 2 | Escola"
- */
+const slugifyModalidade = (valor: string) =>
+  valor
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "-");
+
+const getModalidadeBySlug = (slug?: string) => {
+  if (!slug) return MODALIDADES_INFO[0].nome;
+
+  return (
+    MODALIDADES_INFO.find((m) => slugifyModalidade(m.nome) === slug)?.nome ??
+    MODALIDADES_INFO[0].nome
+  );
+};
+
 export const CadastroEmMassa = ({ open, onOpenChange, onSaved }: Props) => {
+  const { modalidade: modalidadeUrl } = useParams();
+
+  const modalidadeFixa = useMemo(
+    () => getModalidadeBySlug(modalidadeUrl),
+    [modalidadeUrl]
+  );
+
   const [categoria, setCategoria] = useState<string>(CATEGORIAS[0]);
   const [naipe, setNaipe] = useState<string>(NAIPES[0]);
-  const [modalidade, setModalidade] = useState<string>(MODALIDADES_INFO[0].nome);
+  const [modalidade, setModalidade] = useState<string>(modalidadeFixa);
   const [text, setText] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const info = useMemo(() => getModalidadeInfo(modalidade), [modalidade]);
+  const modalidadeAtual = modalidadeUrl ? modalidadeFixa : modalidade;
+
+  const info = useMemo(
+    () => getModalidadeInfo(modalidadeAtual),
+    [modalidadeAtual]
+  );
 
   const lines = text
     .split("\n")
@@ -71,7 +92,6 @@ export const CadastroEmMassa = ({ open, onOpenChange, onSaved }: Props) => {
       : "Nome do atleta  (escola opcional após | )";
 
   const parseLine = (line: string) => {
-    // separa parte antes/depois de "|"
     const [esquerda, escolaRaw] = line.split("|").map((s) => s.trim());
     const escola = escolaRaw && escolaRaw.length > 0 ? escolaRaw : null;
 
@@ -86,11 +106,15 @@ export const CadastroEmMassa = ({ open, onOpenChange, onSaved }: Props) => {
     }
 
     if (info.atletas === 2) {
-      // separadores aceitos: & / e / +
-      const partes = esquerda.split(/\s*(?:&|\/|\+|\be\b)\s*/i).filter(Boolean);
+      const partes = esquerda
+        .split(/\s*(?:&|\/|\+|\be\b)\s*/i)
+        .filter(Boolean);
+
       const a1 = partes[0]?.trim() ?? "";
       const a2 = partes[1]?.trim() ?? "";
+
       if (!a1 || !a2) return null;
+
       return {
         nome: `${a1} & ${a2}`,
         tipo_inscricao: "atletas" as const,
@@ -100,8 +124,8 @@ export const CadastroEmMassa = ({ open, onOpenChange, onSaved }: Props) => {
       };
     }
 
-    // individual
     if (!esquerda) return null;
+
     return {
       nome: esquerda,
       tipo_inscricao: "atletas" as const,
@@ -120,19 +144,25 @@ export const CadastroEmMassa = ({ open, onOpenChange, onSaved }: Props) => {
       toast.error("Adicione ao menos uma linha válida");
       return;
     }
+
     setSaving(true);
+
     const rows = validos.map((p) => ({
       ...p.data!,
       categoria,
       naipe,
-      modalidade,
+      modalidade: modalidadeAtual,
     }));
+
     const { error } = await supabase.from("equipes").insert(rows);
+
     setSaving(false);
+
     if (error) {
       toast.error("Erro ao cadastrar em massa");
       return;
     }
+
     toast.success(`${rows.length} cadastro(s) criado(s)!`);
     setText("");
     onSaved();
@@ -147,58 +177,107 @@ export const CadastroEmMassa = ({ open, onOpenChange, onSaved }: Props) => {
             <Zap className="w-6 h-6 text-accent" />
             Cadastro rápido em massa
           </DialogTitle>
+
           <DialogDescription>
-            Defina categoria, naipe e modalidade. Depois cole ou digite várias linhas — uma por equipe/atleta.
+            Defina categoria e naipe. A modalidade está travada conforme a tela
+            escolhida.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-3">
+          <div
+            className={`grid gap-3 ${
+              modalidadeUrl ? "grid-cols-2" : "grid-cols-3"
+            }`}
+          >
             <div>
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Categoria</Label>
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+                Categoria
+              </Label>
+
               <Select value={categoria} onValueChange={setCategoria}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+
                 <SelectContent>
-                  {CATEGORIAS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Naipe</Label>
-              <Select value={naipe} onValueChange={setNaipe}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {NAIPES.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Modalidade</Label>
-              <Select value={modalidade} onValueChange={setModalidade}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {MODALIDADES_INFO.map((m) => (
-                    <SelectItem key={m.nome} value={m.nome}>
-                      <span className="flex items-center gap-2">
-                        {m.tipo === "escola" ? (
-                          <Users className="w-3.5 h-3.5 text-muted-foreground" />
-                        ) : (
-                          <User className="w-3.5 h-3.5 text-muted-foreground" />
-                        )}
-                        {m.nome}
-                      </span>
+                  {CATEGORIAS.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+
+            <div>
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+                Naipe
+              </Label>
+
+              <Select value={naipe} onValueChange={setNaipe}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {NAIPES.map((n) => (
+                    <SelectItem key={n} value={n}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {!modalidadeUrl && (
+              <div>
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+                  Modalidade
+                </Label>
+
+                <Select value={modalidade} onValueChange={setModalidade}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {MODALIDADES_INFO.map((m) => (
+                      <SelectItem key={m.nome} value={m.nome}>
+                        <span className="flex items-center gap-2">
+                          {m.tipo === "escola" ? (
+                            <Users className="w-3.5 h-3.5 text-muted-foreground" />
+                          ) : (
+                            <User className="w-3.5 h-3.5 text-muted-foreground" />
+                          )}
+                          {m.nome}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
+
+          {modalidadeUrl && (
+            <div className="rounded-lg border border-border bg-secondary/40 px-4 py-3">
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                Modalidade travada
+              </span>
+
+              <div className="font-display text-xl font-bold">
+                {modalidadeAtual}
+              </div>
+            </div>
+          )}
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <Label>Lista — uma linha por cadastro</Label>
               <span className="text-xs text-muted-foreground">{exemplo}</span>
             </div>
+
             <Textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -207,19 +286,26 @@ export const CadastroEmMassa = ({ open, onOpenChange, onSaved }: Props) => {
               className="font-mono text-sm"
               autoFocus
             />
+
             <div className="flex flex-wrap gap-2 mt-2">
               <Badge className="bg-winner/20 text-winner border-winner/40 hover:bg-winner/30">
                 {validos.length} válida(s)
               </Badge>
+
               {invalidos.length > 0 && (
                 <Badge className="bg-destructive/20 text-destructive border-destructive/40 hover:bg-destructive/30">
                   {invalidos.length} inválida(s)
                 </Badge>
               )}
             </div>
+
             {invalidos.length > 0 && (
               <div className="mt-2 text-xs text-muted-foreground">
-                Linhas inválidas: {invalidos.slice(0, 3).map((i) => `"${i.raw}"`).join(", ")}
+                Linhas inválidas:{" "}
+                {invalidos
+                  .slice(0, 3)
+                  .map((i) => `"${i.raw}"`)
+                  .join(", ")}
                 {invalidos.length > 3 && "..."}
               </div>
             )}
@@ -227,7 +313,10 @@ export const CadastroEmMassa = ({ open, onOpenChange, onSaved }: Props) => {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancelar
+          </Button>
+
           <Button
             onClick={salvar}
             disabled={saving || validos.length === 0}

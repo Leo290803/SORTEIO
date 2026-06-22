@@ -1,9 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+
 import Index from "./pages/Index.tsx";
+import ModalidadeHome from "./pages/ModalidadeHome.tsx";
 import Equipes from "./pages/Equipes.tsx";
 import Sorteio from "./pages/Sorteio.tsx";
 import Historico from "./pages/Historico.tsx";
@@ -17,14 +20,46 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+
       <BrowserRouter>
         <Routes>
+
+          {/* Página inicial */}
           <Route path="/" element={<Index />} />
-          <Route path="/equipes" element={<Equipes />} />
-          <Route path="/sorteio" element={<Sorteio />} />
-          <Route path="/historico" element={<Historico />} />
-          <Route path="/historico/:id" element={<HistoricoDetalhe />} />
+
+          {/* Home da modalidade */}
+          <Route
+            path="/modalidade/:modalidade"
+            element={<ModalidadeHome />}
+          />
+
+          {/* Cadastros */}
+          <Route
+            path="/modalidade/:modalidade/equipes"
+            element={<Equipes />}
+          />
+
+          {/* Sorteio */}
+          <Route
+            path="/modalidade/:modalidade/sorteio"
+            element={<Sorteio />}
+          />
+
+          {/* Histórico */}
+          <Route
+            path="/modalidade/:modalidade/historico"
+            element={<Historico />}
+          />
+
+          {/* Detalhe histórico */}
+          <Route
+            path="/modalidade/:modalidade/historico/:id"
+            element={<HistoricoDetalhe />}
+          />
+
+          {/* 404 */}
           <Route path="*" element={<NotFound />} />
+
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

@@ -16,7 +16,7 @@ interface Sorteio {
 }
 
 const HistoricoDetalhe = () => {
-  const { id } = useParams();
+  const { id, modalidade } = useParams();
   const navigate = useNavigate();
 
   const [sorteio, setSorteio] = useState<Sorteio | null>(null);
@@ -29,11 +29,13 @@ const HistoricoDetalhe = () => {
     (async () => {
       const [{ data: s }, { data: r }, { data: equipes }] = await Promise.all([
         supabase.from("sorteios").select("*").eq("id", id).maybeSingle(),
+
         supabase
           .from("resultados_sorteio")
           .select("equipe_nome, grupo, posicao, confronto")
           .eq("sorteio_id", id)
           .order("posicao", { ascending: true }),
+
         supabase.from("equipes").select("nome, escola"),
       ]);
 
@@ -53,28 +55,25 @@ const HistoricoDetalhe = () => {
     })();
   }, [id]);
 
-  // 🗑️ EXCLUIR
+  const voltarHistorico = `/modalidade/${modalidade}/historico`;
+  const voltarModalidade = `/modalidade/${modalidade}`;
+
   const handleDelete = async () => {
     const confirmar = confirm("Tem certeza que deseja excluir este sorteio?");
     if (!confirmar || !id) return;
 
     try {
-      await supabase
-        .from("resultados_sorteio")
-        .delete()
-        .eq("sorteio_id", id);
-
+      await supabase.from("resultados_sorteio").delete().eq("sorteio_id", id);
       await supabase.from("sorteios").delete().eq("id", id);
 
       alert("Sorteio excluído com sucesso!");
-      navigate("/historico");
+      navigate(voltarHistorico);
     } catch (error) {
       console.error(error);
       alert("Erro ao excluir sorteio.");
     }
   };
 
-  // 🖨️ IMPRIMIR
   const handlePrint = () => {
     window.print();
   };
@@ -85,10 +84,11 @@ const HistoricoDetalhe = () => {
 
       <main className="container py-8 md:py-12">
         <Link
-          to="/historico"
+          to={voltarHistorico}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors print:hidden"
         >
-          <ArrowLeft className="w-4 h-4" /> Voltar ao histórico
+          <ArrowLeft className="w-4 h-4" />
+          Voltar ao histórico
         </Link>
 
         {loading ? (
@@ -101,15 +101,12 @@ const HistoricoDetalhe = () => {
           </div>
         ) : (
           <>
-            {/* 🔥 CABEÇALHO PARA IMPRESSÃO */}
             <div className="hidden print:block text-center mb-6">
               <h1 className="text-2xl font-bold">SORTEIO OFICIAL</h1>
               <p>
                 {sorteio.modalidade} - {sorteio.categoria} - {sorteio.naipe}
               </p>
-              <p>
-                {new Date(sorteio.created_at).toLocaleString("pt-BR")}
-              </p>
+              <p>{new Date(sorteio.created_at).toLocaleString("pt-BR")}</p>
             </div>
 
             <div className="mb-8">
@@ -130,8 +127,7 @@ const HistoricoDetalhe = () => {
                 </Badge>
               </div>
 
-              {/* 🔥 BOTÕES */}
-              <div className="flex gap-3 print:hidden">
+              <div className="flex flex-wrap gap-3 print:hidden">
                 <button
                   onClick={handleDelete}
                   className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
@@ -147,6 +143,13 @@ const HistoricoDetalhe = () => {
                   <Printer className="w-4 h-4" />
                   Imprimir
                 </button>
+
+                <Link
+                  to={voltarModalidade}
+                  className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-card transition"
+                >
+                  Voltar para modalidade
+                </Link>
               </div>
             </div>
 
