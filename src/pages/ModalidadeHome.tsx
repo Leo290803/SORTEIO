@@ -1,6 +1,13 @@
 import { Link, useParams } from "react-router-dom";
 import { AppHeader } from "@/components/AppHeader";
-import { Users, Shuffle, History, Trophy, ArrowLeft } from "lucide-react";
+import {
+  Users,
+  Shuffle,
+  History,
+  Trophy,
+  ArrowLeft,
+  CalendarDays,
+} from "lucide-react";
 
 const modalidades: Record<string, string> = {
   futsal: "Futsal",
@@ -31,7 +38,13 @@ const ModalidadeHome = () => {
       to: `/modalidade/${modalidade}/sorteio`,
       icon: Shuffle,
       title: "Realizar Sorteio",
-      desc: "Fazer sorteio de grupos ou mata-mata somente dessa modalidade.",
+      desc: "Fazer sorteio de grupos ou mata-mata dessa modalidade.",
+    },
+    {
+      to: `/modalidade/${modalidade}/jogos`,
+      icon: CalendarDays,
+      title: "Jogos",
+      desc: "Gerar confrontos, horários, quadras e tabela oficial.",
     },
     {
       to: `/modalidade/${modalidade}/historico`,
@@ -68,7 +81,7 @@ const ModalidadeHome = () => {
           </p>
         </section>
 
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {cards.map(({ to, icon: Icon, title, desc }) => (
             <Link
               key={to}
@@ -86,7 +99,9 @@ const ModalidadeHome = () => {
                   {title}
                 </h2>
 
-                <p className="text-muted-foreground">{desc}</p>
+                <p className="text-muted-foreground">
+                  {desc}
+                </p>
               </div>
             </Link>
           ))}

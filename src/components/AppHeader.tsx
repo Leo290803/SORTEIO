@@ -1,5 +1,11 @@
 import { Link, useLocation, useParams } from "react-router-dom";
-import { Trophy, Users, Shuffle, History } from "lucide-react";
+import {
+  Trophy,
+  Users,
+  Shuffle,
+  History,
+  CalendarDays,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const AppHeader = () => {
@@ -10,12 +16,39 @@ export const AppHeader = () => {
 
   const links = modalidade
     ? [
-        { to: "/", label: "Início", icon: Trophy },
-        { to: `${baseModalidade}/equipes`, label: "Equipes", icon: Users },
-        { to: `${baseModalidade}/sorteio`, label: "Sorteio", icon: Shuffle },
-        { to: `${baseModalidade}/historico`, label: "Histórico", icon: History },
+        {
+          to: "/",
+          label: "Início",
+          icon: Trophy,
+        },
+        {
+          to: `${baseModalidade}/equipes`,
+          label: "Equipes",
+          icon: Users,
+        },
+        {
+          to: `${baseModalidade}/sorteio`,
+          label: "Sorteio",
+          icon: Shuffle,
+        },
+        {
+          to: `${baseModalidade}/jogos`,
+          label: "Jogos",
+          icon: CalendarDays,
+        },
+        {
+          to: `${baseModalidade}/historico`,
+          label: "Histórico",
+          icon: History,
+        },
       ]
-    : [{ to: "/", label: "Início", icon: Trophy }];
+    : [
+        {
+          to: "/",
+          label: "Início",
+          icon: Trophy,
+        },
+      ];
 
   return (
     <header className="border-b border-border/60 bg-card/40 backdrop-blur-xl sticky top-0 z-40">
@@ -39,24 +72,29 @@ export const AppHeader = () => {
           </div>
         </Link>
 
-        <nav className="flex items-center gap-1 md:gap-2">
+        <nav className="flex items-center gap-1 md:gap-2 overflow-x-auto">
           {links.map(({ to, label, icon: Icon }) => {
             const active =
-              to === "/" ? pathname === "/" : pathname.startsWith(to);
+              to === "/"
+                ? pathname === "/"
+                : pathname.startsWith(to);
 
             return (
               <Link
                 key={to}
                 to={to}
                 className={cn(
-                  "flex items-center gap-2 px-3 md:px-4 py-2 rounded-md text-sm font-medium transition-all",
+                  "flex items-center gap-2 px-3 md:px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap",
                   active
                     ? "bg-primary text-primary-foreground shadow-glow"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                 )}
               >
                 <Icon className="w-4 h-4" />
-                <span className="hidden md:inline">{label}</span>
+
+                <span className="hidden md:inline">
+                  {label}
+                </span>
               </Link>
             );
           })}

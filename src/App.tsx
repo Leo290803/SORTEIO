@@ -9,6 +9,7 @@ import Index from "./pages/Index.tsx";
 import ModalidadeHome from "./pages/ModalidadeHome.tsx";
 import Equipes from "./pages/Equipes.tsx";
 import Sorteio from "./pages/Sorteio.tsx";
+import Jogos from "./pages/Jogos.tsx";
 import Historico from "./pages/Historico.tsx";
 import HistoricoDetalhe from "./pages/HistoricoDetalhe.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -43,6 +44,12 @@ const App = () => (
           <Route
             path="/modalidade/:modalidade/sorteio"
             element={<Sorteio />}
+          />
+
+          {/* Jogos */}
+          <Route
+            path="/modalidade/:modalidade/jogos"
+            element={<Jogos />}
           />
 
           {/* Histórico */}
