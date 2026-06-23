@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Dialog,
@@ -35,20 +35,23 @@ interface Props {
   onSaved: () => void;
 }
 
-const slugifyModalidade = (valor: string) =>
-  valor
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, "-");
+const MODALIDADE_POR_SLUG: Record<string, string> = {
+  futsal: "Futsal",
+  voleibol: "Voleibol",
+  basquetebol: "Basquetebol",
+  handebol: "Handebol",
+  futebol: "Futebol",
+  queimada: "Queimada",
+  "volei-de-praia": "Vôlei de Praia",
+  "tenis-de-mesa": "Tênis de Mesa",
+  xadrez: "Xadrez",
+  atletismo: "Atletismo",
+};
 
 const getModalidadeBySlug = (slug?: string) => {
   if (!slug) return MODALIDADES_INFO[0].nome;
 
-  return (
-    MODALIDADES_INFO.find((m) => slugifyModalidade(m.nome) === slug)?.nome ??
-    MODALIDADES_INFO[0].nome
-  );
+  return MODALIDADE_POR_SLUG[slug] ?? MODALIDADES_INFO[0].nome;
 };
 
 export const CadastroEmMassa = ({ open, onOpenChange, onSaved }: Props) => {
@@ -61,9 +64,17 @@ export const CadastroEmMassa = ({ open, onOpenChange, onSaved }: Props) => {
 
   const [categoria, setCategoria] = useState<string>(CATEGORIAS[0]);
   const [naipe, setNaipe] = useState<string>(NAIPES[0]);
-  const [modalidade, setModalidade] = useState<string>(modalidadeFixa);
+  const [modalidade, setModalidade] = useState<string>(
+    modalidadeUrl ? modalidadeFixa : MODALIDADES_INFO[0].nome
+  );
   const [text, setText] = useState("");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (modalidadeUrl) {
+      setModalidade(modalidadeFixa);
+    }
+  }, [modalidadeUrl, modalidadeFixa]);
 
   const modalidadeAtual = modalidadeUrl ? modalidadeFixa : modalidade;
 
