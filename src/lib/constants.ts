@@ -4,14 +4,13 @@ export const NAIPES = ["Masculino", "Feminino"] as const;
 export interface ModalidadeInfo {
   nome: string;
   tipo: "escola" | "atletas";
-  // Quantos atletas o cadastro recebe (1 = individual, 2 = dupla)
   atletas?: 1 | 2;
 }
 
 export const MODALIDADES_INFO: ModalidadeInfo[] = [
   { nome: "Futsal", tipo: "escola" },
-  { nome: "Vôlei", tipo: "escola" },
-  { nome: "Basquete", tipo: "escola" },
+  { nome: "Voleibol", tipo: "escola" },
+  { nome: "Basquetebol", tipo: "escola" },
   { nome: "Handebol", tipo: "escola" },
   { nome: "Futebol", tipo: "escola" },
   { nome: "Queimada", tipo: "escola" },
